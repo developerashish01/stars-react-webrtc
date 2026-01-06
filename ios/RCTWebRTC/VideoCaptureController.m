@@ -6,7 +6,7 @@
 
 @interface VideoCaptureController ()
 
-@property(nonatomic, strong) RTCCameraVideoCapturer *capturer;
+@property(nonatomic, strong) JitsiCameraVideoCapturer *capturer;
 @property(nonatomic, strong) AVCaptureDeviceFormat *selectedFormat;
 @property(nonatomic, strong) AVCaptureDevice *device;
 @property(nonatomic, assign) BOOL running;
@@ -19,7 +19,7 @@
 
 @implementation VideoCaptureController
 
-- (instancetype)initWithCapturer:(RTCCameraVideoCapturer *)capturer andConstraints:(NSDictionary *)constraints {
+- (instancetype)initWithCapturer:(JitsiCameraVideoCapturer *)capturer andConstraints:(NSDictionary *)constraints {
     self = [super init];
     if (self) {
         self.capturer = capturer;
@@ -253,7 +253,7 @@
 }
 
 - (AVCaptureDevice *)findDeviceForPosition:(AVCaptureDevicePosition)position {
-    NSArray<AVCaptureDevice *> *captureDevices = [RTCCameraVideoCapturer captureDevices];
+    NSArray<AVCaptureDevice *> *captureDevices = [JitsiCameraVideoCapturer captureDevices];
     for (AVCaptureDevice *device in captureDevices) {
         if (device.position == position) {
             return device;
@@ -266,7 +266,7 @@
 - (AVCaptureDeviceFormat *)selectFormatForDevice:(AVCaptureDevice *)device
                                  withTargetWidth:(int)targetWidth
                                 withTargetHeight:(int)targetHeight {
-    NSArray<AVCaptureDeviceFormat *> *formats = [RTCCameraVideoCapturer supportedFormatsForDevice:device];
+    NSArray<AVCaptureDeviceFormat *> *formats = [JitsiCameraVideoCapturer supportedFormatsForDevice:device];
     AVCaptureDeviceFormat *selectedFormat = nil;
     int currentDiff = INT_MAX;
 

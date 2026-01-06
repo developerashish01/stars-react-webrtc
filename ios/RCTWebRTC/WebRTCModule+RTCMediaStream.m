@@ -16,6 +16,9 @@
 #import "TrackCapturerEventsEmitter.h"
 #import "VideoCaptureController.h"
 
+#import "JitsiCaptureInjector.h"
+#import "JitsiCameraVideoCapturer.h"
+
 @implementation WebRTCModule (RTCMediaStream)
 
 - (VideoEffectProcessor *)videoEffectProcessor {
@@ -116,6 +119,7 @@
 /**
  * Initializes a new {@link RTCVideoTrack} which satisfies the given constraints.
  */
+
 - (RTCVideoTrack *)createVideoTrack:(NSDictionary *)constraints {
 #if TARGET_OS_TV
     return nil;
@@ -126,14 +130,27 @@
     RTCVideoTrack *videoTrack = [self.peerConnectionFactory videoTrackWithSource:videoSource trackId:trackUUID];
 
 #if !TARGET_IPHONE_SIMULATOR
-    RTCCameraVideoCapturer *videoCapturer = [[RTCCameraVideoCapturer alloc] initWithDelegate:videoSource];
+    JitsiCameraVideoCapturer *videoCapturer =  [JitsiCaptureInjector.shared.cameraVideoCapturerSource videoCapturerFrom:videoSource];
+    if(videoCapturer == nil) {
+        videoCapturer = [[JitsiCameraVideoCapturer alloc] initWithDelegate:videoSource];
+    }
+    
     VideoCaptureController *videoCaptureController =
         [[VideoCaptureController alloc] initWithCapturer:videoCapturer andConstraints:constraints[@"video"]];
-    videoCaptureController.enableMultitaskingCameraAccess =
-        [WebRTCModuleOptions sharedInstance].enableMultitaskingCameraAccess;
+    JitsiCaptureInjector.shared.capturer = videoCapturer;
+    [JitsiCaptureInjector.shared.cameraVideoCapturerSource localCameraDidStartTrack:videoTrack];
+    
+    videoCaptureController.enableMultitaskingCameraAccess = true;
     videoTrack.captureController = videoCaptureController;
+//    dispatch_queue_t userInitiatedQueue = dispatch_get_global_queue(QOS_CLASS_USER_INITIATED, 0);
+//    dispatch_async(userInitiatedQueue, ^{
+//        // Start your WebRTC capturer or AVCaptureSession here
+//        [videoCaptureController startCapture];
+//    });
     [videoCaptureController startCapture];
-#endif
+    
+    
+#endif  !TARGET_IPHONE_SIMULATOR
 
     return videoTrack;
 #endif

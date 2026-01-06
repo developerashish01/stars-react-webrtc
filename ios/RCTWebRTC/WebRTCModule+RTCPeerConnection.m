@@ -20,6 +20,8 @@
 #import "WebRTCModule+RTCPeerConnection.h"
 #import "WebRTCModule+VideoTrackAdapter.h"
 #import "WebRTCModule.h"
+#import "JitsiCaptureInjector.h"
+#import "JitsiCameraVideoCapturer.h"
 
 @implementation RTCPeerConnection (React)
 
@@ -719,12 +721,14 @@ RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(peerConnectionRemoveTrack : (nonnull NSNu
                                @"pcId" : peerConnection.reactTag,
                                @"signalingState" : [self stringForSignalingState:newState]
                            }];
+        [[JitsiCaptureInjector shared].peerConnectionDelegate peerConnection:peerConnection didChangeSignalingState:newState];
     });
 }
 
 - (void)peerConnectionShouldNegotiate:(RTCPeerConnection *)peerConnection {
     dispatch_async(self.workerQueue, ^{
         [self sendEventWithName:kEventPeerConnectionOnRenegotiationNeeded body:@{@"pcId" : peerConnection.reactTag}];
+        [[JitsiCaptureInjector shared].peerConnectionDelegate peerConnectionShouldNegotiate:peerConnection];
     });
 }
 
@@ -735,6 +739,7 @@ RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(peerConnectionRemoveTrack : (nonnull NSNu
                                @"pcId" : peerConnection.reactTag,
                                @"connectionState" : [self stringForPeerConnectionState:newState]
                            }];
+        [[JitsiCaptureInjector shared].peerConnectionDelegate peerConnection:peerConnection didChangeConnectionState:newState];
     });
 }
 
@@ -745,6 +750,7 @@ RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(peerConnectionRemoveTrack : (nonnull NSNu
                                @"pcId" : peerConnection.reactTag,
                                @"iceConnectionState" : [self stringForICEConnectionState:newState]
                            }];
+        [[JitsiCaptureInjector shared].peerConnectionDelegate peerConnection:peerConnection didChangeIceConnectionState:newState];
     });
 }
 
@@ -767,6 +773,7 @@ RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(peerConnectionRemoveTrack : (nonnull NSNu
                                @"iceGatheringState" : [self stringForICEGatheringState:newState],
                                @"sdp" : newSdp
                            }];
+        [[JitsiCaptureInjector shared].peerConnectionDelegate peerConnection:peerConnection didChangeIceGatheringState:newState];
     });
 }
 
@@ -791,6 +798,7 @@ RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(peerConnectionRemoveTrack : (nonnull NSNu
                                },
                                @"sdp" : newSdp
                            }];
+        [[JitsiCaptureInjector shared].peerConnectionDelegate peerConnection:peerConnection didGenerateIceCandidate:candidate];
     });
 }
 
@@ -817,6 +825,7 @@ RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(peerConnectionRemoveTrack : (nonnull NSNu
         NSDictionary *body = @{@"pcId" : peerConnection.reactTag, @"dataChannel" : dataChannelInfo};
 
         [self sendEventWithName:kEventPeerConnectionDidOpenDataChannel body:body];
+        [[JitsiCaptureInjector shared].peerConnectionDelegate peerConnection:peerConnection didOpenDataChannel:dataChannel];
     });
 }
 
@@ -887,6 +896,8 @@ RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(peerConnectionRemoveTrack : (nonnull NSNu
         params[@"pcId"] = peerConnection.reactTag;
 
         [self sendEventWithName:kEventPeerConnectionOnTrack body:params];
+        [[JitsiCaptureInjector shared].cameraVideoCapturerSource mediaTrackDidAdded:rtpReceiver data:params];
+        [[JitsiCaptureInjector shared].peerConnectionDelegate peerConnection:peerConnection didAddReceiver:rtpReceiver streams:mediaStreams];
     });
 }
 
@@ -899,20 +910,21 @@ RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(peerConnectionRemoveTrack : (nonnull NSNu
         params[@"receiverId"] = rtpReceiver.receiverId;
 
         [self sendEventWithName:kEventPeerConnectionOnRemoveTrack body:params];
+        
+        [[JitsiCaptureInjector shared].cameraVideoCapturerSource mediaTrackDidRemoved:rtpReceiver data:params];
+        [[JitsiCaptureInjector shared].peerConnectionDelegate peerConnection:peerConnection didRemoveReceiver:rtpReceiver];
     });
 }
 
 - (void)peerConnection:(nonnull RTCPeerConnection *)peerConnection
     didRemoveIceCandidates:(nonnull NSArray<RTCIceCandidate *> *)candidates {
     // Unimplemented, there is no matching web API.
+    [[JitsiCaptureInjector shared].peerConnectionDelegate peerConnection:peerConnection didRemoveIceCandidates:candidates];
 }
 
 - (void)peerConnection:(nonnull RTCPeerConnection *)peerConnection didAddStream:(nonnull RTCMediaStream *)stream {
     // Unused in Unified Plan.
-}
-
-- (void)peerConnection:(nonnull RTCPeerConnection *)peerConnection didRemoveStream:(nonnull RTCMediaStream *)stream {
-    // Unused in Unified Plan.
+    [[JitsiCaptureInjector shared].peerConnectionDelegate peerConnection:peerConnection didAddStream:stream];
 }
 
 @end

@@ -4,14 +4,15 @@
 #import <WebRTC/RTCCameraVideoCapturer.h>
 
 #import "CaptureController.h"
+#import "JitsiCameraVideoCapturer.h"
 
 @interface VideoCaptureController : CaptureController
-@property(nonatomic, readonly, strong) RTCCameraVideoCapturer *capturer;
+@property(nonatomic, readonly, strong) JitsiCameraVideoCapturer *capturer;
 @property(nonatomic, readonly, strong) AVCaptureDeviceFormat *selectedFormat;
 @property(nonatomic, readonly, assign) int frameRate;
 @property(nonatomic, assign) BOOL enableMultitaskingCameraAccess;
 
-- (instancetype)initWithCapturer:(RTCCameraVideoCapturer *)capturer andConstraints:(NSDictionary *)constraints;
+- (instancetype)initWithCapturer:(JitsiCameraVideoCapturer *)capturer andConstraints:(NSDictionary *)constraints;
 - (void)startCapture;
 - (void)stopCapture;
 - (void)switchCamera;
