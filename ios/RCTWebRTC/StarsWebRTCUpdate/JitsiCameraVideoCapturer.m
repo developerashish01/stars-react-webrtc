@@ -23,10 +23,15 @@
 #import "AVCaptureSession_Jitsi.h"
 
 const int64_t kNanosecondsPerSecond = 1000000000;
+//static inline BOOL IsMediaSubTypeSupported(FourCharCode mediaSubType) {
+//    return (mediaSubType == kCVPixelFormatType_420YpCbCr8PlanarFullRange ||
+//            mediaSubType == kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange);
+//}
+
 static inline BOOL IsMediaSubTypeSupported(FourCharCode mediaSubType) {
-    return (mediaSubType == kCVPixelFormatType_420YpCbCr8PlanarFullRange ||
-            mediaSubType == kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange);
+    return (mediaSubType == kCVPixelFormatType_32BGRA);
 }
+
 @interface JitsiCameraVideoCapturer ()<AVCaptureVideoDataOutputSampleBufferDelegate>
 @property(nonatomic, readonly) dispatch_queue_t frameQueue;
 @end
