@@ -536,7 +536,10 @@ __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_9_0
     videoDataOutput.videoSettings = @{
         (NSString *)
         // TODO(denicija): Remove this color conversion and use the original capture format directly.
-        kCVPixelBufferPixelFormatTypeKey : @(kCVPixelFormatType_420YpCbCr8BiPlanarFullRange)
+        //kCVPixelBufferPixelFormatTypeKey : @(kCVPixelFormatType_420YpCbCr8BiPlanarFullRange)
+        kCVPixelBufferPixelFormatTypeKey : @(kCVPixelFormatType_32BGRA)
+        
+        
     };
     videoDataOutput.alwaysDiscardsLateVideoFrames = NO;
     [videoDataOutput setSampleBufferDelegate:self queue:self.frameQueue];
